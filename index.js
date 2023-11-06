@@ -57,9 +57,16 @@ async function run() {
 
     const tabCategoryCollection = client.db("JobBox").collection("tabsDB");
     const postedJobCollection = client.db("JobBox").collection("postJob");
+    const popularJobCollection = client.db("JobBox").collection("popularJobs")
+
+    // popularJobs
+    app.get('/api/popularJobs', async (req, res) => {
+      const cursor = popularJobCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
 
     // update a job
-
     app.get("/api/v1/userPostJobs/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
