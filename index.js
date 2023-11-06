@@ -30,7 +30,7 @@ const client = new MongoClient(uri, {
 
 ////// Middle Ware \\\\\\\
 const logger = (req, res, next) => {
-  console.log("Log Info", req.method, req.url);
+  // console.log("Log Info", req.method, req.url);
   next();
 };
 
@@ -55,15 +55,39 @@ async function run() {
     await client.connect();
 
     const tabCategoryCollection = client.db("JobBox").collection("tabsDB");
+    const postedJobCollection = client.db("JobBox").collection("postJob");
 
+
+
+    // User Posted Jobs
+
+    app.delete('/api/v1/userPostJobs/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)};
+      const result = await postedJobCollection.deleteOne(query);
+      res.send(result);
+    })
+
+    app.get('/api/v1/userPostJobs', async (req, res) => {
+      const cursor = postedJobCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+    
+    app.post('/api/v1/userPostJobs', async (req, res) => {
+      const user = req.body;
+      console.log('new user', user);
+      const result = await postedJobCollection.insertOne(user);
+      res.send(result);
+    })
 
     /// Bids Detail Page
-    // app.get('/api/v1/tabs/:id', async(req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { _id: new ObjectId(id)};
-    //   const details = await tabCategoryCollection.findOne(filter);
-    //   res.send(details);
-    // })
+    app.get('/api/v1/tabs/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)};
+      const details = await tabCategoryCollection.findOne(query);
+      res.send(details);
+    })
 
     // Tabs Data GetOne
     app.get("/api/v1/tabs", async (req, res) => {
@@ -77,7 +101,7 @@ async function run() {
     //login jwt token
     app.post("/jwt", (req, res) => {
       const user = req.body;
-      console.log("user for tokens", user);
+      // console.log("user for tokens", user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" });
       res
         .cookie("token", token, {
