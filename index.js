@@ -9,10 +9,12 @@ const port = process.env.PORT || 5000;
 
 //////// Middle Ware \\\\\\\\
 
-app.use(cors({
-  origin: ["http://localhost:5173"],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -26,7 +28,6 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   },
 });
-
 
 ////// Middle Ware \\\\\\\
 const logger = (req, res, next) => {
@@ -57,37 +58,61 @@ async function run() {
     const tabCategoryCollection = client.db("JobBox").collection("tabsDB");
     const postedJobCollection = client.db("JobBox").collection("postJob");
 
+    // update a job
 
+    app.get("/api/v1/userPostJobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await postedJobCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.put("/api/v1/userPostJobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const option = { upert: true };
+      const updatedJobs = req.body;
+      const jobs = {
+        $set: {
+          job_title: updatedJobs.job_title,
+          deadline: updatedJobs.deadline,
+          minimum_price: updatedJobs.minimum_price,
+          maximum_price: updatedJobs.maximum_price,
+          short_description: updatedJobs.short_description,
+          jobCategory: updatedJobs.jobCategory,
+        },
+      };
+      const result = await postedJobCollection.updateOne(filter, jobs, option);
+      res.send(result);
+    });
 
     // User Posted Jobs
-
-    app.delete('/api/v1/userPostJobs/:id', async (req, res) => {
+    app.delete("/api/v1/userPostJobs/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await postedJobCollection.deleteOne(query);
       res.send(result);
-    })
+    });
 
-    app.get('/api/v1/userPostJobs', async (req, res) => {
+    app.get("/api/v1/userPostJobs", async (req, res) => {
       const cursor = postedJobCollection.find();
       const result = await cursor.toArray();
       res.send(result);
-    })
-    
-    app.post('/api/v1/userPostJobs', async (req, res) => {
+    });
+
+    app.post("/api/v1/userPostJobs", async (req, res) => {
       const user = req.body;
-      console.log('new user', user);
       const result = await postedJobCollection.insertOne(user);
       res.send(result);
-    })
+    });
 
     /// Bids Detail Page
-    app.get('/api/v1/tabs/:id', async(req, res) => {
+    app.get("/api/v1/tabs/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const details = await tabCategoryCollection.findOne(query);
       res.send(details);
-    })
+    });
 
     // Tabs Data GetOne
     app.get("/api/v1/tabs", async (req, res) => {
@@ -96,8 +121,7 @@ async function run() {
       res.send(result);
     });
 
-
-       /// Auth Related API
+    /// Auth Related API
     //login jwt token
     app.post("/jwt", (req, res) => {
       const user = req.body;
