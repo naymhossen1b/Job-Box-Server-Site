@@ -61,6 +61,20 @@ async function run() {
     const userBidCollection = client.db("JobBox").collection("userBids");
 
     // User Bid Request Routes
+    app.patch('/api/v1/userBids/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateRequest = req.body;
+      console.log(updateRequest);
+      const updateDoc = {
+          $set: {
+              status: updateRequest.status
+          },
+      };
+      const result = await userBidCollection.updateOne(filter, updateDoc);
+      res.send(result);
+  })
+
     app.delete("/api/v1/userBids/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
