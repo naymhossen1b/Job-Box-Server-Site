@@ -14,7 +14,8 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://job-box-f8f75.web.app",
-      "https://job-box-f8f75.firebaseapp.com"
+      "https://job-box-f8f75.firebaseapp.com",
+      "https://job-box-apps.netlify.app"
     ],
     credentials: true,
   })
@@ -94,11 +95,17 @@ async function run() {
 
     //Shorting my bids route category wise
     // User Bids Projects
-    app.get("/api/v1/userBids", async (req, res) => {
-      const cursor = userBidCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    });
+       app.get("/api/v1/userBids", async (req, res)=> {
+      const userEmail = req.query.email;
+      const query = { email : userEmail}
+      const isBids = await userBidCollection.find(query).toArray();
+      res.send(isBids)
+    })
+    // app.get("/api/v1/userBids", async (req, res) => {
+    //   const cursor = userBidCollection.find();
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // });
 
     app.post("/api/v1/userBids", async (req, res) => {
       const user = req.body;
@@ -148,11 +155,22 @@ async function run() {
       res.send(result);
     });
 
+    //   app.get("/api/v1/userPostJobs", async (req, res)=> {
+    //   const userEmail = req.query.email;
+    //   const query = { email : userEmail}
+    //   const postJob = await postedJobCollection.find(query).toArray();
+    //   res.send(postJob)
+    // })
     app.get("/api/v1/userPostJobs", async (req, res) => {
       const cursor = postedJobCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    ///
+    ///
+    ///
+    ///
 
     app.post("/api/v1/userPostJobs", async (req, res) => {
       const user = req.body;
