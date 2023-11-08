@@ -11,7 +11,11 @@ const port = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://job-box-f8f75.web.app",
+      "https://job-box-f8f75.firebaseapp.com"
+    ],
     credentials: true,
   })
 );
@@ -31,7 +35,7 @@ const client = new MongoClient(uri, {
 
 ////// Middle Ware \\\\\\\
 const logger = (req, res, next) => {
-  // console.log("Log Info", req.method, req.url);
+  console.log("Log Info", req.method, req.url);
   next();
 };
 
@@ -39,7 +43,7 @@ const verifyToken = (req, res, next) => {
   const token = req.cookies?.token;
   // console.log('token in the middleware', token);
   if (!token) {
-    return res.status(401).send({ message: "unauthorized access" });
+    return res.status(401).send({ message: "unauthorized" });
   }
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
@@ -53,7 +57,7 @@ const verifyToken = (req, res, next) => {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const tabCategoryCollection = client.db("JobBox").collection("tabsDB");
     const postedJobCollection = client.db("JobBox").collection("postJob");
@@ -61,19 +65,26 @@ async function run() {
     const userBidCollection = client.db("JobBox").collection("userBids");
 
     // User Bid Request Routes
-    app.patch('/api/v1/userBids/:id', async (req, res) => {
+    app.patch("/api/v1/userBids/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateRequest = req.body;
       console.log(updateRequest);
       const updateDoc = {
-          $set: {
-              status: updateRequest.status
-          },
+        $set: {
+          status: updateRequest.status,
+        },
       };
       const result = await userBidCollection.updateOne(filter, updateDoc);
-      res.send(result);
-  })
+      console.log(result);
+
+      if (result.matchedCount && result.modifiedCount) {
+        const updatedDocument = await userBidCollection.findOne(filter);
+        res.send({ message: "User bid updated successfully", updatedDocument });
+      } else {
+        res.status(404).send({ message: "User bid not found or no modifications were made" });
+      }
+    });
 
     app.delete("/api/v1/userBids/:id", async (req, res) => {
       const id = req.params.id;
@@ -82,6 +93,7 @@ async function run() {
       res.send(result);
     });
 
+    //Shorting my bids route
     // User Bids Projects
     app.get("/api/v1/userBids", async (req, res) => {
       const cursor = userBidCollection.find();
@@ -158,11 +170,17 @@ async function run() {
     });
 
     // Tabs Data GetOne
-    app.get("/api/v1/tabs", async (req, res) => {
-      const cursor = tabCategoryCollection.find();
+    app.get("/api/v1/tabs",  async (req, res) => {
+      let queryObj = {};
+      const category = req.query.category;
+      if (category) {
+        queryObj.category = category;
+      }
+      const cursor = tabCategoryCollection.find(queryObj);
       const result = await cursor.toArray();
       res.send(result);
     });
+
 
     /// Auth Related API
     //login jwt token
