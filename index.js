@@ -12,7 +12,7 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
+      // "http://localhost:5173",
       "https://job-box-f8f75.web.app",
       "https://job-box-f8f75.firebaseapp.com",
       "https://job-box-apps.netlify.app"
@@ -162,7 +162,9 @@ async function run() {
     //   res.send(postJob)
     // })
     app.get("/api/v1/userPostJobs", async (req, res) => {
-      const cursor = postedJobCollection.find();
+      const userEmail = req.query.email;
+      const query = { email : userEmail}
+      const cursor = postedJobCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
