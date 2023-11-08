@@ -76,7 +76,6 @@ async function run() {
         },
       };
       const result = await userBidCollection.updateOne(filter, updateDoc);
-      console.log(result);
 
       if (result.matchedCount && result.modifiedCount) {
         const updatedDocument = await userBidCollection.findOne(filter);
