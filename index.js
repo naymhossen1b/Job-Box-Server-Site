@@ -93,7 +93,7 @@ async function run() {
       res.send(result);
     });
 
-    //Shorting my bids route
+    //Shorting my bids route category wise
     // User Bids Projects
     app.get("/api/v1/userBids", async (req, res) => {
       const cursor = userBidCollection.find();
