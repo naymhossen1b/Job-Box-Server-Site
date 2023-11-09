@@ -12,7 +12,7 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      // "http://localhost:5173",
+      "http://localhost:5173",
       "https://job-box-f8f75.web.app",
       "https://job-box-f8f75.firebaseapp.com",
       "https://job-box-apps.netlify.app"
@@ -154,13 +154,6 @@ async function run() {
       const result = await postedJobCollection.deleteOne(query);
       res.send(result);
     });
-
-    //   app.get("/api/v1/userPostJobs", async (req, res)=> {
-    //   const userEmail = req.query.email;
-    //   const query = { email : userEmail}
-    //   const postJob = await postedJobCollection.find(query).toArray();
-    //   res.send(postJob)
-    // })
     app.get("/api/v1/userPostJobs", async (req, res) => {
       const userEmail = req.query.email;
       const query = { email : userEmail}
@@ -189,7 +182,7 @@ async function run() {
     });
 
     // Tabs Data GetOne
-    app.get("/api/v1/tabs",  async (req, res) => {
+    app.get("/api/v1/tabs", async (req, res) => {
       let queryObj = {};
       const category = req.query.category;
       if (category) {
