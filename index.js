@@ -12,7 +12,7 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
+      // "http://localhost:5173",
       "https://job-box-f8f75.web.app",
       "https://job-box-f8f75.firebaseapp.com",
       "https://job-box-apps.netlify.app"
